@@ -27,10 +27,10 @@ public class MainController {
 
     @PostMapping("/add")
     public ResponseEntity<String> handleFileUpload(@RequestParam("file") MultipartFile file) throws IOException {
-        String uploadFolderName = "uploaded";
-        Files.createDirectories(Paths.get(".", uploadFolderName));
-        Path fullPath = Paths.get(".", uploadFolderName, file.getOriginalFilename());
+        String uploadFolderName = "/app/static";
+        Files.createDirectories(Paths.get(uploadFolderName));
+        Path fullPath = Paths.get(uploadFolderName, file.getOriginalFilename());
         file.transferTo(fullPath);
-        return new ResponseEntity<>("File uploaded!", HttpStatus.CREATED);
+        return new ResponseEntity<>("File uploaded to " + fullPath + "!", HttpStatus.CREATED);
     }
 }

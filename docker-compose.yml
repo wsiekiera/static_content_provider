@@ -3,14 +3,16 @@ services:
   nginx:
     build: ./nginx
     ports:
-      - "8080:80"
+      - "8090:80"
     volumes:
       - static_storage:/usr/share/nginx/html
     container_name: nginx
   api:
     build: ./app
+    ports:
+      - "8080:8080"
     volumes:
-      - static_storage:/app_data
+      - static_storage:/app/static
     container_name: api
 volumes:
   static_storage:

@@ -8,5 +8,5 @@ COPY src src
 RUN ./mvnw install
 
 FROM openjdk:11
-COPY --from=build /workdir/target/*.jar /app.jar
-ENTRYPOINT ["java","-jar","/app.jar"]
+COPY --from=build /workdir/target/*.jar /app/api.jar
+ENTRYPOINT ["java","-jar","/app/api.jar"]
