@@ -1,18 +1,49 @@
 version: "3.9"
 services:
-  nginx:
+  nginx1:
     build: ./nginx
     ports:
-      - "8090:80"
+      - "8091:80"
     volumes:
-      - static_storage:/usr/share/nginx/html
-    container_name: nginx
-  api:
-    build: ./app
+      - static_storage1:/usr/share/nginx/html
+    container_name: nginx1
+  nginx2:
+    build: ./nginx
     ports:
-      - "8080:8080"
+      - "8092:80"
     volumes:
-      - static_storage:/app/static
-    container_name: api
+      - static_storage2:/usr/share/nginx/html
+    container_name: nginx2
+  nginx3:
+    build: ./nginx
+    ports:
+      - "8093:80"
+    volumes:
+      - static_storage3:/usr/share/nginx/html
+    container_name: nginx3
+  api1:
+    build: ./api
+    ports:
+      - "8081:8080"
+    volumes:
+      - static_storage1:/app/static
+    container_name: api1
+  api2:
+    build: ./api
+    ports:
+      - "8082:8080"
+    volumes:
+      - static_storage2:/app/static
+    container_name: api2
+  api3:
+    build: ./api
+    ports:
+      - "8083:8080"
+    volumes:
+      - static_storage3:/app/static
+    container_name: api3
+
 volumes:
-  static_storage:
+  static_storage1:
+  static_storage2:
+  static_storage3:
