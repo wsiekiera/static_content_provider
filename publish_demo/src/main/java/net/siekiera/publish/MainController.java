@@ -39,11 +39,17 @@ public class MainController {
     }
 
     @PostMapping("/publish")
-    public ResponseEntity<String> publishImage(@RequestParam(value = "file") MultipartFile file) throws IOException {
+    public ResponseEntity<String> publishImage(@RequestParam("file") MultipartFile file) throws IOException {
         CloseableHttpClient httpclient = HttpClients.createDefault();
         MultipartEntityBuilder entityBuilder = MultipartEntityBuilder.create();
-        //TODO jak z MultipartFIle zrobic file i wyslac go dalej??
-        entityBuilder.addBinaryBody("file", new File("/Users/eric/kody/static_content_provider/sample_images/1.jpg"));
+        //TODO usuwanie utworzonego pliku w folderze 'temp' + sprzatanie
+
+        String uploadFolderName = "temp";
+        Files.createDirectories(Paths.get(uploadFolderName));
+        Path fullPath = Paths.get(uploadFolderName, file.getOriginalFilename());
+        file.transferTo(fullPath);
+
+        entityBuilder.addBinaryBody("file", fullPath.toFile());
         HttpEntity entity = entityBuilder.build();
 
         HttpUriRequest request1 = RequestBuilder
