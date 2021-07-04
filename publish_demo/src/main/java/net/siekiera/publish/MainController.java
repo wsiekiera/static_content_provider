@@ -53,15 +53,15 @@ public class MainController {
         HttpEntity entity = entityBuilder.build();
 
         HttpUriRequest request1 = RequestBuilder
-                .post("http://localhost:8081/add")
+                .post("http://api1:8080/add")
                 .setEntity(entity)
                 .build();
         HttpUriRequest request2 = RequestBuilder
-                .post("http://localhost:8082/add")
+                .post("http://api2:8080/add")
                 .setEntity(entity)
                 .build();
         HttpUriRequest request3 = RequestBuilder
-                .post("http://localhost:8083/add")
+                .post("http://api3:8080/add")
                 .setEntity(entity)
                 .build();
 

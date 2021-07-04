@@ -30,6 +30,6 @@ public class MainController {
         Files.createDirectories(Paths.get(uploadFolderName));
         Path fullPath = Paths.get(uploadFolderName, file.getOriginalFilename());
         file.transferTo(fullPath);
-        return new ResponseEntity<>("[" + serverName + "] File uploaded to path " + fullPath, HttpStatus.CREATED);
+        return new ResponseEntity<>("[" + serverName + "] File uploaded to path: " + fullPath, HttpStatus.CREATED);
     }
 }

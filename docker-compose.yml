@@ -2,20 +2,25 @@ version: "3.9"
 services:
   nginx1:
     build: ./nginx
+    image: nginximage
     ports:
       - "8091:80"
     volumes:
       - static_storage1:/usr/share/nginx/html
     container_name: nginx1
   nginx2:
-    build: ./nginx
+    depends_on:
+      - nginx1
+    image: nginximage
     ports:
       - "8092:80"
     volumes:
       - static_storage2:/usr/share/nginx/html
     container_name: nginx2
   nginx3:
-    build: ./nginx
+    depends_on:
+      - nginx1
+    image: nginximage
     ports:
       - "8093:80"
     volumes:
@@ -25,33 +30,44 @@ services:
   api1:
     build:
       context: ./api
-      args:
-        HOSTNAME: node1
+    image: apiimage
     ports:
       - "8081:8080"
     volumes:
       - static_storage1:/app/static
     container_name: api1
+    environment:
+      - server.name=node1a
   api2:
-    build:
-      context: ./api
-      args:
-        HOSTNAME: node2
+    depends_on:
+      - api1
+    image: apiimage
     ports:
       - "8082:8080"
     volumes:
       - static_storage2:/app/static
     container_name: api2
+    environment:
+      - server.name=node2a
   api3:
-    build:
-      context: ./api
-      args:
-        HOSTNAME: node3
+    depends_on:
+      - api1
+    image: apiimage
     ports:
       - "8083:8080"
     volumes:
       - static_storage3:/app/static
     container_name: api3
+    environment:
+      - server.name=node3a
+
+  publisher:
+    build:
+      context: ./publish_demo
+    image: publisherimage
+    ports:
+      - "8080:8080"
+    container_name: publisher
 
 volumes:
   static_storage1:
