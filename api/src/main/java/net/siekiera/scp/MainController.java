@@ -1,6 +1,7 @@
 package net.siekiera.scp;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
@@ -15,8 +16,8 @@ import java.nio.file.Paths;
 
 @RestController
 public class MainController {
-//    @Autowired
-//    private HttpServletRequest request;
+    @Value("${server.name}")
+    private String serverName;
 
     @GetMapping("/status")
     public ResponseEntity<String> healthcheck() {
@@ -29,6 +30,6 @@ public class MainController {
         Files.createDirectories(Paths.get(uploadFolderName));
         Path fullPath = Paths.get(uploadFolderName, file.getOriginalFilename());
         file.transferTo(fullPath);
-        return new ResponseEntity<>("File uploaded to " + fullPath + "!", HttpStatus.CREATED);
+        return new ResponseEntity<>("[" + serverName + "] File uploaded to path " + fullPath, HttpStatus.CREATED);
     }
 }

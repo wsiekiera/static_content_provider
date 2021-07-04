@@ -21,22 +21,32 @@ services:
     volumes:
       - static_storage3:/usr/share/nginx/html
     container_name: nginx3
+
   api1:
-    build: ./api
+    build:
+      context: ./api
+      args:
+        HOSTNAME: node1
     ports:
       - "8081:8080"
     volumes:
       - static_storage1:/app/static
     container_name: api1
   api2:
-    build: ./api
+    build:
+      context: ./api
+      args:
+        HOSTNAME: node2
     ports:
       - "8082:8080"
     volumes:
       - static_storage2:/app/static
     container_name: api2
   api3:
-    build: ./api
+    build:
+      context: ./api
+      args:
+        HOSTNAME: node3
     ports:
       - "8083:8080"
     volumes:
