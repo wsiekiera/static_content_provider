@@ -1,5 +1,7 @@
 package net.siekiera.publish;
 
+import org.apache.http.entity.ContentType;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
@@ -14,73 +16,48 @@ import org.apache.http.entity.mime.MultipartEntityBuilder;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.util.EntityUtils;
+import software.amazon.awssdk.core.sync.RequestBody;
+import software.amazon.awssdk.regions.Region;
+import software.amazon.awssdk.services.s3.S3Client;
+import software.amazon.awssdk.services.s3.model.*;
 
 import java.io.File;
 import java.io.IOException;
+import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.List;
+import java.util.Objects;
 
 @RestController
 public class MainController {
+    @Value("${bucket.name}")
+    private String bucketName;
+    @Value("${s3.storage.path}")
+    private String storagePath;
+
 
     @GetMapping("/status")
     public ResponseEntity<String> healthcheck() {
         return new ResponseEntity<>("OK", HttpStatus.OK);
     }
 
-    @PostMapping("/add")
-    public ResponseEntity<String> handleFileUpload(@RequestParam(value = "file") MultipartFile file) throws IOException {
-        String uploadFolderName = "/app/static";
-        Files.createDirectories(Paths.get(uploadFolderName));
-        Path fullPath = Paths.get(uploadFolderName, file.getOriginalFilename());
-        file.transferTo(fullPath);
-        return new ResponseEntity<>("File uploaded to " + fullPath + "!", HttpStatus.CREATED);
-    }
-
     @PostMapping("/publish")
-    public ResponseEntity<String> publishImage(@RequestParam("file") MultipartFile file) throws IOException {
-        CloseableHttpClient httpclient = HttpClients.createDefault();
-        MultipartEntityBuilder entityBuilder = MultipartEntityBuilder.create();
-        //TODO usuwanie utworzonego pliku w folderze 'temp' + sprzatanie
-
-        String uploadFolderName = "temp";
-        Files.createDirectories(Paths.get(uploadFolderName));
-        Path fullPath = Paths.get(uploadFolderName, file.getOriginalFilename());
-        file.transferTo(fullPath);
-
-        entityBuilder.addBinaryBody("file", fullPath.toFile());
-        HttpEntity entity = entityBuilder.build();
-
-        HttpUriRequest request1 = RequestBuilder
-                .post("http://api1:8080/add")
-                .setEntity(entity)
+    public ResponseEntity<String> publishImage(@RequestParam("file") MultipartFile file, @RequestParam("contentHash") String contentHash) throws IOException {
+        String storageKey = String.join("/", List.of(storagePath, contentHash, Objects.requireNonNull(file.getOriginalFilename())));
+        S3Client amazonS3 = S3Client.builder()
+                .region(Region.EU_WEST_1)
                 .build();
-        HttpUriRequest request2 = RequestBuilder
-                .post("http://api2:8080/add")
-                .setEntity(entity)
+        PutObjectRequest request = PutObjectRequest.builder()
+                .bucket(bucketName)
+                .key(storageKey)
+                .acl(ObjectCannedACL.PUBLIC_READ)
+                .contentType("image/jpeg")
                 .build();
-        HttpUriRequest request3 = RequestBuilder
-                .post("http://api3:8080/add")
-                .setEntity(entity)
-                .build();
-
-        HttpResponse httpresponse1 = httpclient.execute(request1);
-        HttpResponse httpresponse2 = httpclient.execute(request2);
-        HttpResponse httpresponse3 = httpclient.execute(request3);
-
-        System.out.println("Done successfully!");
-        System.out.println(httpresponse1);
-        System.out.println(EntityUtils.toString(httpresponse1.getEntity()));
-
-        System.out.println("Done successfully!");
-        System.out.println(httpresponse2);
-        System.out.println(EntityUtils.toString(httpresponse2.getEntity()));
-
-        System.out.println("Done successfully!");
-        System.out.println(httpresponse3);
-        System.out.println(EntityUtils.toString(httpresponse3.getEntity()));
-
-        return new ResponseEntity<>("OK", HttpStatus.ACCEPTED);
+        PutObjectResponse response = amazonS3
+                .putObject(request, RequestBody.fromBytes(file.getBytes()));
+        URL contentUrl = amazonS3.utilities().getUrl(GetUrlRequest.builder().bucket(bucketName).key(storageKey).build());
+        return new ResponseEntity<>(contentUrl.toString(), HttpStatus.ACCEPTED);
     }
 }
