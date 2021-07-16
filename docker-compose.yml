@@ -8,6 +8,7 @@ services:
     volumes:
       - static_storage1:/usr/share/nginx/html
     container_name: nginx1
+
   nginx2:
     depends_on:
       - nginx1
@@ -17,6 +18,7 @@ services:
     volumes:
       - static_storage2:/usr/share/nginx/html
     container_name: nginx2
+
   nginx3:
     depends_on:
       - nginx1
@@ -26,40 +28,6 @@ services:
     volumes:
       - static_storage3:/usr/share/nginx/html
     container_name: nginx3
-
-  api1:
-    build:
-      context: ./api
-    image: apiimage
-    ports:
-      - "8081:8080"
-    volumes:
-      - static_storage1:/app/static
-    container_name: api1
-    environment:
-      - server.name=node1a
-  api2:
-    depends_on:
-      - api1
-    image: apiimage
-    ports:
-      - "8082:8080"
-    volumes:
-      - static_storage2:/app/static
-    container_name: api2
-    environment:
-      - server.name=node2a
-  api3:
-    depends_on:
-      - api1
-    image: apiimage
-    ports:
-      - "8083:8080"
-    volumes:
-      - static_storage3:/app/static
-    container_name: api3
-    environment:
-      - server.name=node3a
 
   publisher:
     build:
